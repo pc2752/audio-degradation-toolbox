@@ -99,9 +99,13 @@ class Degradation(object):
                 threshold, ratio, attack, release
             )
         elif name == "impulse_response":
-            path = d["path"]
-            self.file_audio = apply_impulse_response(self.file_audio, path)
-            params = "path: {0}".format(path)
+            rt60 = int(d.get("rt60", 500))
+            edt = int(d.get("edt", 50))
+            itdg = int(d.get("itdg", 3))
+            er_duration = int(d.get("er_duration", 80))
+            drr = int(d.get("drr", int(rt60 * (- 1 / 100)) + numpy.random.randint(0, numpy.ceil(rt60 * (1 / 100)))))
+            self.file_audio = apply_impulse_response(self.file_audio,rt60,edt,itdg,drr,er_duration)
+            params = "rt60 : {0},edt: {1},itdg: {2},drr: {3},er_duration:{4}".format(rt60,edt,itdg,drr,er_duration)
         elif name == "equalizer":
             frequency = float(d["frequency"])
             bandwidth = float(d.get("bandwidth", 1.0))

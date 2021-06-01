@@ -12,7 +12,8 @@ import scipy.interpolate as scipy_interpolate
 import librosa
 import numba
 from pysndfx import AudioEffectsChain
-
+from storir import ImpulseResponse
+import matplotlib.pyplot as plt
 
 def mp3_transcode(audio, bitrate):
     # do a pydub round trip through an mp3 file
@@ -106,13 +107,21 @@ def apply_dynamic_range_compression(audio, threshold, ratio, attack, release):
     )
 
 
-def apply_impulse_response(audio, ir_path):
-    ir = Audio(path=ir_path)
+def apply_impulse_response(audio, rt60,edt,itdg,drr,er_duration):
+    rir = ImpulseResponse(rt60=rt60,
+                          edt=edt,
+                          itdg=itdg,
+                          drr=drr,
+                          er_duration=er_duration)
+    ir = rir.generate(sampling_rate=audio.sample_rate)
 
-    if ir.sample_rate != audio.sample_rate:
-        ir = apply_resample(ir, audio.sample_rate)
+    plt.plot(ir)
+    plt.show()
 
-    conv_s = scipy_signal.fftconvolve(audio.samples, ir.samples)
+    # if ir.sample_rate != audio.sample_rate:
+    #     ir = apply_resample(ir, audio.sample_rate)
+
+    conv_s = scipy_signal.fftconvolve(audio.samples, ir)
     conv_s = _normalize(conv_s, audio.sound.sample_width * 8)
 
     conv_s = array.array(audio.sound.array_type, conv_s.astype(audio.sound.array_type))
