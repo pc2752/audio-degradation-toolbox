@@ -1,0 +1,3 @@
+[submodule "storir"]
+	path = storir
+	url = https://github.com/pc2752/storir.git
